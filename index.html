@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>التعلّم الذاتي وأثره في مهارات القرن الحادي والعشرين</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Tajawal:wght@300;400;500;700&family=Amiri:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#07030f;
+    --violet-950:#0d0618;
+    --violet-900:#140a28;
+    --violet-800:#1d0f38;
+    --violet-700:#2b1550;
+    --gold-1:#f8e7bd;
+    --gold-2:#e5c07a;
+    --gold-3:#b7873b;
+    --text:#f4eefa;
+    --muted:#b9a9cf;
+    --line:rgba(229,192,122,.22);
+    --card:rgba(255,255,255,.035);
+    --font-head:'El Messiri','Amiri','Segoe UI',Tahoma,sans-serif;
+    --font-body:'Tajawal','Segoe UI',Tahoma,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--ink);
+    color:var(--text);
+    font-family:var(--font-body);
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ===== الخلفية خارج المسرح ===== */
+  .backdrop{
+    position:fixed;inset:0;
+    background:
+      radial-gradient(900px 600px at 88% 8%, rgba(120,64,210,.20), transparent 65%),
+      radial-gradient(800px 600px at 6% 96%, rgba(183,135,59,.13), transparent 65%),
+      linear-gradient(160deg,#0b0517 0%,#06020d 60%,#0a0414 100%);
+  }
+  .backdrop::after{
+    content:"";position:absolute;inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cg fill='none' stroke='%23e5c07a' stroke-width='0.6' stroke-opacity='0.35'%3E%3Cpath d='M60 8 74 46 112 60 74 74 60 112 46 74 8 60 46 46Z'/%3E%3Ccircle cx='60' cy='60' r='16'/%3E%3C/g%3E%3C/svg%3E");
+    opacity:.05;
+    pointer-events:none;
+  }
+
+  /* ===== المسرح 16:9 ===== */
+  .stage-wrap{position:fixed;inset:0;display:grid;place-items:center;padding:24px}
+  .stage{
+    position:relative;
+    width:1280px;height:720px;
+    border-radius:24px;
+    overflow:hidden;
+    transform-origin:center center;
+    background:
+      radial-gradient(820px 560px at 86% 4%, rgba(139,84,236,.28), transparent 68%),
+      radial-gradient(640px 520px at 8% 100%, rgba(201,154,63,.13), transparent 66%),
+      linear-gradient(150deg,#180b2f 0%,#0e0619 52%,#140a28 100%);
+    border:1px solid rgba(229,192,122,.26);
+    box-shadow:
+      0 50px 120px rgba(0,0,0,.75),
+      0 0 0 1px rgba(255,255,255,.03) inset,
+      0 0 90px rgba(120,64,210,.18);
+  }
+  /* إطار داخلي ذهبي رقيق */
+  .stage::before{
+    content:"";position:absolute;inset:14px;
+    border:1px solid rgba(229,192,122,.14);
+    border-radius:16px;
+    pointer-events:none;z-index:5;
+  }
+  /* زخرفة هندسية */
+  .stage::after{
+    content:"";position:absolute;inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Cg fill='none' stroke='%23e5c07a' stroke-width='0.7' stroke-opacity='0.45'%3E%3Cpath d='M48 6 60 36 90 48 60 60 48 90 36 60 6 48 36 36Z'/%3E%3Ccircle cx='48' cy='48' r='13'/%3E%3C/g%3E%3C/svg%3E");
+    opacity:.045;
+    pointer-events:none;z-index:1;
+  }
+  .orb{position:absolute;border-radius:50%;filter:blur(70px);pointer-events:none;z-index:0}
+  .orb.a{width:420px;height:420px;top:-160px;right:-90px;background:rgba(126,66,222,.5);animation:float 14s ease-in-out infinite alternate}
+  .orb.b{width:360px;height:360px;bottom:-170px;left:-80px;background:rgba(183,135,59,.25);animation:float 18s ease-in-out infinite alternate-reverse}
+  @keyframes float{from{transform:translate3d(0,0,0)}to{transform:translate3d(24px,32px,0)}}
+
+  /* ===== الشرائح ===== */
+  .slide{
+    position:absolute;inset:0;z-index:2;
+    padding:54px 78px 92px;
+    display:flex;flex-direction:column;
+    opacity:0;visibility:hidden;
+    transform:translateY(14px) scale(.994);
+    transition:opacity .55s ease, transform .7s cubic-bezier(.2,.7,.2,1), visibility 0s linear .55s;
+  }
+  .slide.active{
+    opacity:1;visibility:visible;transform:none;
+    transition:opacity .6s ease, transform .8s cubic-bezier(.2,.7,.2,1), visibility 0s;
+  }
+  /* رقم مائي */
+  .slide::before{
+    content:attr(data-n);
+    position:absolute;top:6px;left:44px;
+    font-family:var(--font-head);font-size:128px;line-height:1;
+    color:rgba(229,192,122,.055);pointer-events:none;
+    font-weight:700;letter-spacing:2px;
+  }
+
+  /* حركة العناصر */
+  .anim{opacity:0;transform:translateY(18px);transition:opacity .7s ease, transform .75s cubic-bezier(.2,.7,.2,1)}
+  .slide.active .anim{opacity:1;transform:none;transition-delay:calc(var(--i,0) * 85ms + 120ms)}
+
+  /* ===== الترويسة ===== */
+  .head{display:flex;flex-direction:column;gap:8px;margin-bottom:26px;flex:0 0 auto}
+  .kicker{display:flex;align-items:center;gap:10px;color:var(--gold-2);font-size:13px;font-weight:500}
+  .kicker::before{content:"";width:26px;height:1px;background:linear-gradient(90deg,transparent,var(--gold-3),var(--gold-2))}
+  .kicker .diamond{font-size:8px;color:var(--gold-2);line-height:1}
+  h2{
+    font-family:var(--font-head);font-weight:600;
+    font-size:41px;line-height:1.35;color:#fbf5e7;
+    text-shadow:0 2px 30px rgba(0,0,0,.35);
+  }
+  h2 em{font-style:normal;color:var(--gold-2)}
+  .rule{width:82px;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--gold-2),rgba(183,135,59,0));margin-top:4px}
+
+  /* ===== عناصر عامة ===== */
+  .grad{
+    background:linear-gradient(92deg,#fbf0d2 0%,#e5c07a 28%,#c79a4b 48%,#f6e3b4 68%,#fbf0d2 100%);
+    background-size:220% 100%;
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    animation:shine 9s linear infinite;
+  }
+  @keyframes shine{to{background-position:220% 50%}}
+
+  .card{
+    position:relative;
+    background:linear-gradient(160deg,rgba(255,255,255,.055),rgba(255,255,255,.018));
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:22px 22px 20px;
+    transition:transform .35s ease, border-color .35s ease, box-shadow .35s ease, background .35s ease;
+    overflow:hidden;
+  }
+  .card::before{
+    content:"";position:absolute;top:0;right:0;left:0;height:1px;
+    background:linear-gradient(90deg,transparent,rgba(248,231,189,.5),transparent);
+    opacity:.5;
+  }
+  .card:hover{
+    transform:translateY(-5px);
+    border-color:rgba(229,192,122,.5);
+    box-shadow:0 18px 44px rgba(0,0,0,.4),0 0 26px rgba(183,135,59,.12);
+  }
+
+  /* ===== الغلاف ===== */
+  .cover{padding:40px 70px 92px;align-items:center;justify-content:center}
+  .cover .slide-inner{display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;max-width:960px}
+  .cover::before{display:none}
+  .crest{width:92px;height:92px;display:grid;place-items:center;position:relative;margin-bottom:2px}
+  .crest svg{width:92px;height:92px;color:var(--gold-2);filter:drop-shadow(0 0 18px rgba(229,192,122,.25))}
+  .crest::after{content:"";position:absolute;inset:6px;border-radius:50%;border:1px solid rgba(229,192,122,.18)}
+  .cover-eyebrow{
+    font-size:13px;color:var(--gold-2);
+    display:flex;align-items:center;gap:14px;
+  }
+  .cover-eyebrow::before,.cover-eyebrow::after{content:"";width:38px;height:1px;background:linear-gradient(90deg,transparent,var(--gold-3))}
+  .cover-eyebrow::after{background:linear-gradient(270deg,transparent,var(--gold-3))}
+  .cover-title{
+    font-family:var(--font-head);font-weight:700;
+    font-size:54px;line-height:1.4;color:#fdf8ee;
+    letter-spacing:0;
+  }
+  .cover-title .line2{display:block;font-size:38px;margin-top:2px}
+  .cover-rule{display:flex;align-items:center;gap:12px;margin:8px 0 4px}
+  .cover-rule span{width:110px;height:1px;background:linear-gradient(90deg,transparent,rgba(229,192,122,.75))}
+  .cover-rule span:last-child{background:linear-gradient(270deg,transparent,rgba(229,192,122,.75))}
+  .cover-rule i{font-style:normal;font-size:9px;color:var(--gold-2)}
+  .cover-sub{font-size:19px;color:#d9cde9;font-weight:300}
+  .cover-name{
+    margin-top:8px;display:flex;flex-direction:column;align-items:center;gap:5px;
+  }
+  .cover-name .name-label{
+    font-size:12.5px;color:var(--gold-2);
+    display:flex;align-items:center;gap:10px;
+  }
+  .cover-name .name-label::before,
+  .cover-name .name-label::after{
+    content:"";width:26px;height:1px;
+    background:linear-gradient(90deg,transparent,rgba(229,192,122,.6));
+  }
+  .cover-name .name-label::after{
+    background:linear-gradient(270deg,transparent,rgba(229,192,122,.6));
+  }
+  .cover-name b{
+    font-family:var(--font-head);font-weight:600;
+    font-size:40px;line-height:1.4;
+    padding:0 4px;
+    background:linear-gradient(92deg,#fbf0d2 0%,#e5c07a 30%,#c79a4b 50%,#f6e3b4 70%,#fbf0d2 100%);
+    background-size:220% 100%;
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    animation:shine 9s linear infinite;
+    filter:drop-shadow(0 4px 22px rgba(201,154,63,.28));
+  }
+  .cover-name b::after{
+    content:"";display:block;width:56px;height:1px;margin:2px auto 0;
+    background:linear-gradient(90deg,transparent,rgba(229,192,122,.7),transparent);
+  }
+  .hint{font-size:12.5px;color:rgba(185,169,207,.7);margin-top:10px;display:flex;align-items:center;gap:8px}
+  .hint kbd{
+    font-family:var(--font-body);font-size:12px;color:var(--gold-2);
+    border:1px solid rgba(229,192,122,.25);border-radius:6px;
+    padding:1px 7px;background:rgba(255,255,255,.03);
+  }
+
+  /* ===== شريحة 2 ===== */
+  .split{display:grid;grid-template-columns:1.05fr .95fr;gap:26px;align-items:stretch;flex:1;min-height:0}
+  .points{display:flex;flex-direction:column;gap:12px}
+  .point{
+    display:flex;gap:15px;align-items:flex-start;
+    padding:15px 18px;border-radius:14px;
+    background:linear-gradient(90deg,rgba(255,255,255,.045),rgba(255,255,255,.012));
+    border:1px solid rgba(229,192,122,.12);
+    transition:border-color .3s ease,background .3s ease,transform .3s ease;
+  }
+  .point:hover{border-color:rgba(229,192,122,.4);background:rgba(229,192,122,.06);transform:translateX(-4px)}
+  .point-num{
+    flex:0 0 auto;width:30px;height:30px;border-radius:50%;
+    display:grid;place-items:center;
+    font-family:var(--font-head);font-size:13px;color:var(--gold-1);
+    border:1px solid rgba(229,192,122,.35);
+    background:radial-gradient(circle at 30% 25%,rgba(229,192,122,.18),transparent 70%);
+  }
+  .point h3{font-size:17.5px;font-weight:500;color:#fbf4e6;margin-bottom:3px;font-family:var(--font-head)}
+  .point p{font-size:14px;color:#bfb0d3;line-height:1.7;font-weight:300}
+
+  .quote-panel{
+    position:relative;border-radius:18px;overflow:hidden;
+    border:1px solid rgba(229,192,122,.26);
+    background:
+      radial-gradient(340px 260px at 80% 0%,rgba(126,66,222,.35),transparent 70%),
+      linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.015));
+    padding:34px 30px;display:flex;flex-direction:column;justify-content:center;gap:16px;
+    text-align:center;
+  }
+  .quote-panel::before{
+    content:"”";position:absolute;top:-6px;right:20px;
+    font-family:Georgia,serif;font-size:120px;line-height:1;
+    color:rgba(229,192,122,.16);
+  }
+  .quote-panel .q-text{
+    font-family:var(--font-head);font-size:24px;line-height:1.8;color:#f9f1e2;
+    position:relative;z-index:1;
+  }
+  .quote-panel .q-line{width:54px;height:1px;margin:0 auto;background:linear-gradient(90deg,transparent,var(--gold-2),transparent)}
+  .q-tags{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;position:relative;z-index:1}
+  .q-tags span{
+    font-size:12.5px;color:var(--gold-1);
+    border:1px solid rgba(229,192,122,.3);border-radius:99px;
+    padding:4px 12px;background:rgba(229,192,122,.06);
+  }
+
+  /* ===== شريحة 3 ===== */
+  .reasons{display:grid;grid-template-columns:1fr 1fr;gap:18px;flex:1;min-height:0}
+  .reason{
+    padding:22px 24px;display:flex;flex-direction:column;gap:9px;justify-content:center;
+  }
+  .reason-top{display:flex;align-items:center;justify-content:space-between}
+  .reason-num{
+    font-family:var(--font-head);font-size:30px;line-height:1;
+    color:rgba(229,192,122,.55);
+  }
+  .reason h3{font-family:var(--font-head);font-size:20px;color:#fdf6e8;font-weight:500}
+  .reason p{font-size:14.5px;line-height:1.8;color:#bdaecf;font-weight:300}
+  .reason .ic{
+    width:38px;height:38px;border-radius:11px;display:grid;place-items:center;
+    border:1px solid rgba(229,192,122,.28);
+    background:rgba(229,192,122,.07);color:var(--gold-2);
+  }
+  .reason .ic svg{width:19px;height:19px}
+  .closing-strip{
+    margin-top:18px;display:flex;align-items:center;justify-content:center;gap:12px;
+    font-family:var(--font-head);font-size:17px;color:var(--gold-1);
+    border-top:1px solid rgba(229,192,122,.16);padding-top:14px;flex:0 0 auto;
+  }
+  .closing-strip i{font-style:normal;font-size:8px;color:var(--gold-2)}
+
+  /* ===== شريحة 4 ===== */
+  .skills{display:grid;grid-template-columns:repeat(6,1fr);grid-auto-rows:1fr;gap:16px;flex:1;min-height:0}
+  .skill{
+    padding:22px 24px;display:flex;flex-direction:row;align-items:center;justify-content:flex-start;
+    gap:16px;text-align:right;grid-column:span 2;
+  }
+  .skill:nth-child(4),.skill:nth-child(5){grid-column:span 3}
+  .skill-ic{
+    flex:0 0 auto;
+    width:54px;height:54px;border-radius:50%;display:grid;place-items:center;
+    color:var(--gold-1);
+    background:radial-gradient(circle at 30% 25%,rgba(229,192,122,.22),rgba(229,192,122,.04));
+    border:1px solid rgba(229,192,122,.35);
+    box-shadow:0 0 24px rgba(229,192,122,.1);
+  }
+  .skill-ic svg{width:24px;height:24px}
+  .skill-body{display:flex;flex-direction:column;gap:4px}
+  .skill h3{font-family:var(--font-head);font-size:19px;font-weight:500;color:#fdf6e8;line-height:1.4}
+  .skill p{font-size:13.5px;line-height:1.7;color:#b9a9cf;font-weight:300}
+  .skill-num{
+    position:absolute;top:14px;left:18px;
+    font-family:var(--font-head);font-size:11px;color:rgba(229,192,122,.4);
+  }
+  .skills-note{
+    margin-top:18px;text-align:center;font-size:14.5px;color:#c8b9da;
+    border-top:1px solid rgba(229,192,122,.14);padding-top:13px;flex:0 0 auto;
+  }
+  .skills-note b{color:var(--gold-1);font-weight:500}
+
+  /* ===== شريحة 5 (الجدول) ===== */
+  .table{
+    flex:1;min-height:0;display:flex;flex-direction:column;
+    border:1px solid rgba(229,192,122,.18);border-radius:18px;overflow:hidden;
+    background:linear-gradient(160deg,rgba(255,255,255,.04),rgba(255,255,255,.012));
+  }
+  .tr{
+    display:grid;grid-template-columns:280px 1fr 44px;align-items:center;gap:20px;
+    padding:0 26px;flex:1;min-height:0;
+    border-bottom:1px solid rgba(229,192,122,.1);
+    transition:background .3s ease;
+  }
+  .tr:last-child{border-bottom:0}
+  .tr.thead{
+    flex:0 0 46px;background:rgba(229,192,122,.07);
+    font-family:var(--font-head);font-size:13.5px;color:var(--gold-2);
+    border-bottom:1px solid rgba(229,192,122,.22);
+  }
+  .tr:not(.thead):hover{background:rgba(229,192,122,.05)}
+  .tr:not(.thead):hover .arrow{opacity:1;transform:translateX(-4px)}
+  .cell-skill{display:flex;align-items:center;gap:12px}
+  .cell-skill .mini{
+    width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:0 0 auto;
+    color:var(--gold-2);border:1px solid rgba(229,192,122,.25);background:rgba(229,192,122,.05);
+  }
+  .cell-skill .mini svg{width:17px;height:17px}
+  .cell-skill b{font-family:var(--font-head);font-size:16.5px;font-weight:500;color:#fbf4e6}
+  .tr p{font-size:14px;line-height:1.75;color:#bdaecf;font-weight:300}
+  .arrow{
+    color:var(--gold-2);font-size:17px;opacity:.35;transition:.3s ease;justify-self:center;
+  }
+  .table-foot{
+    margin-top:14px;display:flex;align-items:center;gap:9px;justify-content:flex-start;
+    font-size:13px;color:#a795c0;flex:0 0 auto;
+  }
+  .table-foot .dot-g{width:5px;height:5px;border-radius:50%;background:var(--gold-2);box-shadow:0 0 10px var(--gold-2)}
+
+  /* ===== شريحة 6 ===== */
+  .tools{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;flex:1;min-height:0}
+  .tool{padding:26px 24px;display:flex;flex-direction:column;gap:12px}
+  .tool-ic{
+    width:46px;height:46px;border-radius:13px;display:grid;place-items:center;
+    color:var(--gold-1);border:1px solid rgba(229,192,122,.32);
+    background:linear-gradient(150deg,rgba(229,192,122,.16),rgba(229,192,122,.03));
+  }
+  .tool-ic svg{width:22px;height:22px}
+  .tool h3{font-family:var(--font-head);font-size:20px;font-weight:500;color:#fdf6e8}
+  .tool p{font-size:14px;line-height:1.8;color:#b9a9cf;font-weight:300}
+  .tool-tags{margin-top:auto;display:flex;flex-wrap:wrap;gap:7px;padding-top:6px}
+  .tool-tags span{
+    font-size:11.5px;color:#d8c8e9;border:1px solid rgba(255,255,255,.1);
+    background:rgba(255,255,255,.04);border-radius:7px;padding:4px 9px;
+  }
+  .tool:nth-child(1) .tool-tags span{border-color:rgba(229,192,122,.2)}
+  .golden-rule{
+    margin-top:18px;display:flex;align-items:center;justify-content:center;gap:12px;
+    padding-top:14px;border-top:1px solid rgba(229,192,122,.16);
+    font-size:14.5px;color:#cdbede;flex:0 0 auto;
+  }
+  .golden-rule b{color:var(--gold-1);font-weight:500;font-family:var(--font-head)}
+  .golden-rule .sep{width:4px;height:4px;border-radius:50%;background:rgba(229,192,122,.5)}
+
+  /* ===== شريحة 7 ===== */
+  .exp-intro{font-size:15.5px;color:#c6b7d8;margin:-8px 0 18px;font-weight:300;flex:0 0 auto}
+  .exp-intro b{color:var(--gold-1);font-weight:500}
+  .projects{display:grid;grid-template-columns:1fr 1fr;gap:20px;flex:1;min-height:0}
+  .project{padding:26px 26px 22px;display:flex;flex-direction:column;gap:12px;position:relative}
+  .project .p-num{
+    font-family:var(--font-head);font-size:44px;line-height:1;
+    color:transparent;-webkit-text-stroke:1px rgba(229,192,122,.45);
+  }
+  .project h3{font-family:var(--font-head);font-size:22px;font-weight:500;color:#fdf6e8;line-height:1.4}
+  .project .p-desc{font-size:13.5px;line-height:1.8;color:#b3a2c8;font-weight:300}
+  .project ul{list-style:none;display:flex;flex-direction:column;gap:7px;margin-top:auto}
+  .project li{display:flex;align-items:center;gap:9px;font-size:13.5px;color:#d3c5e4}
+  .project li::before{
+    content:"";width:6px;height:6px;flex:0 0 auto;
+    background:linear-gradient(135deg,var(--gold-1),var(--gold-3));
+    transform:rotate(45deg);
+  }
+  .project .p-ic{
+    position:absolute;top:24px;left:26px;color:rgba(229,192,122,.5);
+  }
+  .project .p-ic svg{width:26px;height:26px}
+  .exp-quote{
+    margin-top:18px;padding:15px 24px;border-radius:14px;flex:0 0 auto;
+    display:flex;align-items:center;justify-content:center;gap:12px;
+    background:rgba(229,192,122,.06);border:1px solid rgba(229,192,122,.2);
+    font-family:var(--font-head);font-size:17px;color:var(--gold-1);
+  }
+  .exp-quote span{font-size:11px;color:var(--gold-2)}
+
+  /* ===== شريحة 8 ===== */
+  .final{align-items:center;justify-content:center;text-align:center;padding:40px 70px 92px}
+  .final::before{display:none}
+  .final-inner{display:flex;flex-direction:column;align-items:center;gap:16px;max-width:900px}
+  .final-icon{color:var(--gold-2);width:64px;height:64px}
+  .final-icon svg{width:64px;height:64px;filter:drop-shadow(0 0 22px rgba(229,192,122,.28))}
+  .final-kicker{font-size:12.5px;color:var(--gold-2);display:flex;align-items:center;gap:12px}
+  .final-kicker::before,.final-kicker::after{content:"";width:34px;height:1px;background:rgba(229,192,122,.4)}
+  .final-title{
+    font-family:var(--font-head);font-weight:700;font-size:52px;line-height:1.45;
+    color:#fdf8ee;
+  }
+  .final-title .eq{color:rgba(229,192,122,.6);margin:0 10px;font-weight:400}
+  .final-sub{font-size:17px;color:#c3b3d6;font-weight:300;max-width:640px;line-height:1.8}
+  .final-chips{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:6px}
+  .final-chips span{
+    font-size:13.5px;color:#e7d9f5;padding:9px 18px;border-radius:99px;
+    border:1px solid rgba(229,192,122,.22);background:rgba(255,255,255,.035);
+  }
+  .thanks{
+    margin-top:20px;padding-top:18px;border-top:1px solid rgba(229,192,122,.18);
+    display:flex;flex-direction:column;gap:4px;
+  }
+  .thanks b{font-family:var(--font-head);font-size:22px;font-weight:500;color:var(--gold-1)}
+  .thanks small{font-size:13px;color:#a99ac0;font-weight:300}
+
+  /* ===== شريط التحكم داخل المسرح ===== */
+  .stage-foot{
+    position:absolute;left:0;right:0;bottom:0;height:72px;z-index:6;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 44px;
+    border-top:1px solid rgba(229,192,122,.14);
+    background:linear-gradient(to top,rgba(7,3,15,.85),rgba(7,3,15,.35) 60%,transparent);
+  }
+  .counter{display:flex;align-items:baseline;gap:6px;font-family:var(--font-head);min-width:120px}
+  .counter b{font-size:19px;color:var(--gold-1);font-weight:600;letter-spacing:1px}
+  .counter span{font-size:12px;color:rgba(185,169,207,.6)}
+  .dots{display:flex;align-items:center;gap:9px;flex:1;justify-content:center}
+  .dot{
+    width:8px;height:8px;border-radius:99px;border:0;cursor:pointer;padding:0;
+    background:rgba(229,192,122,.22);transition:.35s ease;
+  }
+  .dot:hover{background:rgba(229,192,122,.5)}
+  .dot.active{
+    width:28px;
+    background:linear-gradient(90deg,var(--gold-2),var(--gold-1));
+    box-shadow:0 0 14px rgba(229,192,122,.45);
+  }
+  .nav-group{display:flex;align-items:center;gap:9px;justify-content:flex-end;min-width:120px}
+  .btn{
+    width:38px;height:38px;border-radius:50%;cursor:pointer;
+    border:1px solid rgba(229,192,122,.32);
+    background:rgba(255,255,255,.03);color:var(--gold-1);
+    display:grid;place-items:center;
+    transition:.25s ease;
+  }
+  .btn:hover:not(:disabled){background:rgba(229,192,122,.14);border-color:var(--gold-2);transform:translateY(-2px);box-shadow:0 8px 22px rgba(0,0,0,.35)}
+  .btn:disabled{opacity:.3;cursor:default}
+  .btn svg{width:17px;height:17px}
+  .btn.small{width:34px;height:34px}
+  .btn.small svg{width:15px;height:15px}
+
+  .progress{position:fixed;top:0;left:0;right:0;height:3px;z-index:50;background:rgba(255,255,255,.05)}
+  .progress b{
+    display:block;height:100%;width:12.5%;
+    background:linear-gradient(90deg,var(--gold-3),var(--gold-1),var(--gold-2));
+    box-shadow:0 0 16px rgba(229,192,122,.6);
+    transition:width .6s cubic-bezier(.2,.7,.2,1);
+  }
+
+  :focus-visible{outline:2px solid var(--gold-2);outline-offset:3px;border-radius:6px}
+
+  @media (prefers-reduced-motion:reduce){
+    .anim,.slide,.grad,.orb{animation:none!important;transition:none!important}
+    .slide.active .anim{opacity:1;transform:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="backdrop"></div>
+
+<div class="stage-wrap">
+  <main class="stage" id="stage" aria-label="عرض تقديمي: التعلّم الذاتي وأثره في مهارات القرن الحادي والعشرين">
+
+    <span class="orb a"></span>
+    <span class="orb b"></span>
+
+    <!-- ========== 1) الغلاف ========== -->
+    <section class="slide cover active" data-n="01" data-title="الغلاف">
+      <div class="slide-inner">
+        <div class="crest anim" style="--i:0">
+          <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.1">
+            <path d="M50 8 61 39 92 50 61 61 50 92 39 61 8 50 39 39Z"/>
+            <circle cx="50" cy="50" r="22"/>
+            <circle cx="50" cy="50" r="30" stroke-opacity=".45"/>
+            <path d="M50 28 57 43 72 50 57 57 50 72 43 57 28 50 43 43Z" stroke-opacity=".55"/>
+          </svg>
+        </div>
+        <p class="cover-eyebrow anim" style="--i:1">عرض تقديمي</p>
+        <h1 class="cover-title anim" style="--i:2">
+          التعلّم الذاتي
+          <span class="line2 grad">وأثره في مهارات القرن الحادي والعشرين</span>
+        </h1>
+        <div class="cover-rule anim" style="--i:3"><span></span><i>◆</i><span></span></div>
+        <p class="cover-sub anim" style="--i:4">حين يصبح التعلّم اختيارًا… يصبح التقدّم عادة</p>
+        <!-- ✏️ غيّر الاسم من هنا -->
+        <div class="cover-name anim" style="--i:5">
+          <span class="name-label">إعداد</span>
+          <b>ملوك المصعبي</b>
+        </div>
+        <p class="hint anim" style="--i:6">
+          استخدم الأسهم <kbd>←</kbd> <kbd>→</kbd> أو أزرار التنقل
+        </p>
+      </div>
+    </section>
+
+    <!-- ========== 2) ما هو التعلم الذاتي ========== -->
+    <section class="slide" data-n="02" data-title="ما هو التعلم الذاتي">
+      <header class="head anim" style="--i:0">
+        <p class="kicker"><span class="diamond">◆</span> المحور الأول</p>
+        <h2>ما هو التعلّم الذاتي؟</h2>
+        <div class="rule"></div>
+      </header>
+      <div class="split">
+        <div class="points">
+          <div class="point anim" style="--i:1">
+            <span class="point-num">١</span>
+            <div><h3>الدافع من الداخل</h3><p>تبدأ لأنك تريد، لا لأن أحدًا طلب منك ذلك.</p></div>
+          </div>
+          <div class="point anim" style="--i:2">
+            <span class="point-num">٢</span>
+            <div><h3>هدف واضح وخطة</h3><p>تعرف إلى أين تذهب، وما الخطوة التالية.</p></div>
+          </div>
+          <div class="point anim" style="--i:3">
+            <span class="point-num">٣</span>
+            <div><h3>مصادر تختارها بنفسك</h3><p>كتب، دورات، فيديو، وتجارب حقيقية.</p></div>
+          </div>
+          <div class="point anim" style="--i:4">
+            <span class="point-num">٤</span>
+            <div><h3>تقييم وتعديل مستمر</h3><p>تقيس ما تعلّمته وتصحّح الطريق.</p></div>
+          </div>
+        </div>
+        <aside class="quote-panel anim" style="--i:3">
+          <p class="q-text">«التعلّم الذاتي ليس حفظًا للمعلومة،<br>بل صناعة الطريقة التي نتعلّم بها.»</p>
+          <div class="q-line"></div>
+          <div class="q-tags">
+            <span>الدافع</span><span>الهدف</span><span>المصدر</span><span>التقييم</span>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ========== 3) لماذا ضروري ========== -->
+    <section class="slide" data-n="03" data-title="لماذا أصبح ضروريًا اليوم">
+      <header class="head anim" style="--i:0">
+        <p class="kicker"><span class="diamond">◆</span> المحور الثاني</p>
+        <h2>لماذا أصبح التعلّم الذاتي ضروريًا اليوم؟</h2>
+        <div class="rule"></div>
+      </header>
+      <div class="reasons">
+        <div class="card reason anim" style="--i:1">
+          <div class="reason-top">
+            <span class="reason-num">01</span>
+            <span class="ic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></svg>
+            </span>
+          </div>
+          <h3>المعرفة تتغيّر بسرعة</h3>
+          <p>ما تتعلّمه اليوم قد يتقادم بعد سنوات قليلة، والمواكبة تحتاج تحديثًا مستمرًا.</p>
+        </div>
+        <div class="card reason anim" style="--i:2">
+          <div class="reason-top">
+            <span class="reason-num">02</span>
+            <span class="ic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            </span>
+          </div>
+          <h3>المعلومات في متناول اليد</h3>
+          <p>التحدي اليوم ليس الوصول للمعلومة، بل اختيارها والتحقق منها.</p>
+        </div>
+        <div class="card reason anim" style="--i:3">
+          <div class="reason-top">
+            <span class="reason-num">03</span>
+            <span class="ic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18 9 8l4 6 3-4 4 8H4Z"/><path d="M4 21h16"/></svg>
+            </span>
+          </div>
+          <h3>الوظائف تطلب مرونة</h3>
+          <p>المهارة الجديدة تفتح فرصًا جديدة، وتحميك من التوقف عند تخصص واحد.</p>
+        </div>
+        <div class="card reason anim" style="--i:4">
+          <div class="reason-top">
+            <span class="reason-num">04</span>
+            <span class="ic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 3 8l9 5 9-5-9-5Z"/><path d="m3 13 9 5 9-5"/><path d="m3 18 9 5 9-5"/></svg>
+            </span>
+          </div>
+          <h3>الشهادة ليست النهاية</h3>
+          <p>القيمة الحقيقية في الاستمرار على التعلّم، لا في ورقة واحدة.</p>
+        </div>
+      </div>
+      <p class="closing-strip anim" style="--i:5">
+        <i>◆</i> من يملك أدوات التعلّم… يملك مفتاح المستقبل <i>◆</i>
+      </p>
+    </section>
+
+    <!-- ========== 4) مهارات القرن 21 ========== -->
+    <section class="slide" data-n="04" data-title="مهارات القرن الحادي والعشرين">
+      <header class="head anim" style="--i:0">
+        <p class="kicker"><span class="diamond">◆</span> المحور الثالث</p>
+        <h2>مهارات القرن الحادي والعشرين</h2>
+        <div class="rule"></div>
+      </header>
+      <div class="skills">
+        <div class="card skill anim" style="--i:1">
+          <span class="skill-ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6-10-6-10-6Z"/><circle cx="12" cy="12" r="2.6"/></svg>
+          </span>
+          <div class="skill-body">
+            <h3>التفكير النقدي</h3>
+            <p>أسأل، أحلّل، وأتحقق من المعلومة.</p>
+          </div>
+          <span class="skill-num">01</span>
+        </div>
+        <div class="card skill anim" style="--i:2">
+          <span class="skill-ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3Z"/><path d="M18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8.8-2.2Z"/></svg>
+          </span>
+          <div class="skill-body">
+            <h3>الإبداع</h3>
+            <p>أفكار جديدة وحلول مختلفة للمشكلة.</p>
+          </div>
+          <span class="skill-num">02</span>
+        </div>
+        <div class="card skill anim" style="--i:3">
+          <span class="skill-ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M21 11.5a7.5 7.5 0 0 1-10.9 6.7L4 20l1.8-5.3A7.5 7.5 0 1 1 21 11.5Z"/><path d="M8.5 11h7M8.5 13.8h4.5" stroke-linecap="round"/></svg>
+          </span>
+          <div class="skill-body">
+            <h3>التواصل</h3>
+            <p>أوصل فكرتي بوضوح، كتابةً وحديثًا.</p>
+          </div>
+          <span class="skill-num">03</span>
+        </div>
+        <div class="card skill anim" style="--i:4">
+          <span class="skill-ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9.5" r="2.2"/><path d="M3.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><path d="M16.5 14.6c2.4.4 4 2.1 4 4.4"/></svg>
+          </span>
+          <div class="skill-body">
+            <h3>التعاون</h3>
+            <p>أنجح مع فريق، وأستمع قبل أن أحكم.</p>
+          </div>
+          <span class="skill-num">04</span>
+        </div>
+        <div class="card skill anim" style="--i:5">
+          <span class="skill-ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M9 20h6M12 16v4"/></svg>
+          </span>
+          <div class="skill-body">
+            <h3>المهارات الرقمية</h3>
+            <p>أستخدم التقنية بذكاء وأمان.</p>
+          </div>
+          <span class="skill-num">05</span>
+        </div>
+      </div>
+      <p class="skills-note anim" style="--i:6">هذه المهارات <b>لا تُحفظ… تُمارَس</b>، وتنمو مع كل تجربة جديدة.</p>
+    </section>
+
+    <!-- ========== 5) تأثير التعلم الذاتي ========== -->
+    <section class="slide" data-n="05" data-title="كيف يؤثر التعلم الذاتي في كل مهارة">
+      <header class="head anim" style="--i:0">
+        <p class="kicker"><span class="diamond">◆</span> المحور الرابع</p>
+        <h2>كيف يؤثر التعلّم الذاتي في كل مهارة؟</h2>
+        <div class="rule"></div>
+      </header>
+      <div class="table anim" style="--i:1">
+        <div class="tr thead">
+          <span>المهارة</span>
+          <span>أثر التعلّم الذاتي</span>
+          <span></span>
+        </div>
+        <div class="tr">
+          <div class="cell-skill">
+            <span class="mini"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6-10-6-10-6Z"/><circle cx="12" cy="12" r="2.6"/></svg></span>
+            <b>التفكير النقدي</b>
+          </div>
+          <p>البحث ومقارنة المصادر يبنيان عادة السؤال والتحقق، لا التصديق السريع.</p>
+          <span class="arrow">↗</span>
+        </div>
+        <div class="tr">
+          <div class="cell-skill">
+            <span class="mini"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3Z"/><path d="M18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8.8-2.2Z"/></svg></span>
+            <b>الإبداع</b>
+          </div>
+          <p>التجربة الحرة بلا خوف من الخطأ تفتح مساحات للابتكار والتجريب.</p>
+          <span class="arrow">↗</span>
+        </div>
+        <div class="tr">
+          <div class="cell-skill">
+            <span class="mini"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M21 11.5a7.5 7.5 0 0 1-10.9 6.7L4 20l1.8-5.3A7.5 7.5 0 1 1 21 11.5Z"/></svg></span>
+            <b>التواصل</b>
+          </div>
+          <p>العرض والمشاركة يصقلان لغتك وقدرتك على إيصال الفكرة وإقناع الآخر.</p>
+          <span class="arrow">↗</span>
+        </div>
+        <div class="tr">
+          <div class="cell-skill">
+            <span class="mini"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9.5" r="2.2"/><path d="M3.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><path d="M16.5 14.6c2.4.4 4 2.1 4 4.4"/></svg></span>
+            <b>التعاون</b>
+          </div>
+          <p>مجتمعات التعلّم توسّع شبكتك وتعلّمك الإنصات والبناء على أفكار الآخرين.</p>
+          <span class="arrow">↗</span>
+        </div>
+        <div class="tr">
+          <div class="cell-skill">
+            <span class="mini"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M9 20h6M12 16v4"/></svg></span>
+            <b>المهارات الرقمية</b>
+          </div>
+          <p>التعامل اليومي مع الأدوات والمنصات يرفع إتقانك وسرعتك في الإنتاج.</p>
+          <span class="arrow">↗</span>
+        </div>
+      </div>
+      <p class="table-foot anim" style="--i:2">
+        <span class="dot-g"></span> كل مهارة تبدأ بخطوة صغيرة… تكرّرها حتى تصبح طبعًا.
+      </p>
+    </section>
+
+    <!-- ========== 6) الأدوات ========== -->
+    <section class="slide" data-n="06" data-title="أدوات التعلم الذاتي">
+      <header class="head anim" style="--i:0">
+        <p class="kicker"><span class="diamond">◆</span> المحور الخامس</p>
+        <h2>أدوات التعلّم الذاتي</h2>
+        <div class="rule"></div>
+      </header>
+      <div class="tools">
+        <div class="card tool anim" style="--i:1">
+          <span class="tool-ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg>
+          </span>
+          <h3>المنصات الرقمية</h3>
+          <p>دورات ومسارات تعليمية منظّمة، تتعلّم فيها بالوتيرة التي تناسبك.</p>
+          <div class="tool-tags"><span>دورات</span><span>مسارات</span><span>شهادات</span></div>
+        </div>
+        <div class="card tool anim" style="--i:2">
+          <span class="tool-ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="2.5" y="4.5" width="19" height="15" rx="3"/><path d="M10.5 9.2l5 2.8-5 2.8V9.2Z"/></svg>
+          </span>
+          <h3>الفيديو والشرح المرئي</h3>
+          <p>درس قصير، ثم تطبيق فوري. المشاهدة وحدها لا تكفي، لكنها بداية ممتازة.</p>
+          <div class="tool-tags"><span>يوتيوب</span><span>دروس قصيرة</span></div>
+        </div>
+        <div class="card tool anim" style="--i:3">
+          <span class="tool-ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 13 9 5 9-5"/></svg>
+          </span>
+          <h3>المشاريع العملية</h3>
+          <p>تتعلّم بالإنتاج لا بالمشاهدة. كل مشروع صغير يثبّت مهارة جديدة.</p>
+          <div class="tool-tags"><span>تطبيق</span><span>تجربة</span><span>ملف إنجاز</span></div>
+        </div>
+      </div>
+      <p class="golden-rule anim" style="--i:4">
+        <b>القاعدة الذهبية</b><span class="sep"></span>خطة واضحة<span class="sep"></span>انتظام<span class="sep"></span>مراجعة
+      </p>
+    </section>
+
+    <!-- ========== 7) مثال عملي ========== -->
+    <section class="slide" data-n="07" data-title="مثال عملي من تجربتي">
+      <header class="head anim" style="--i:0">
+        <p class="kicker"><span class="diamond">◆</span> المحور السادس</p>
+        <h2>مثال عملي من تجربتي</h2>
+        <div class="rule"></div>
+      </header>
+      <p class="exp-intro anim" style="--i:1">تعلّمت <b>بنفسي</b>… ثم حوّلت ما تعلّمته إلى <b>مشروعين</b> حقيقيين.</p>
+      <div class="projects">
+        <article class="card project anim" style="--i:2">
+          <span class="p-ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M6 9 12 3l6 6-6 6-6-6Z"/><path d="m6 15 6 6 6-6"/><path d="M12 3v18" stroke-opacity=".35"/></svg>
+          </span>
+          <span class="p-num">01</span>
+          <h3>مشروع المجوهرات الراقية</h3>
+          <p class="p-desc">تعلّمت الهوية والتصميم والتصوير بنفسي، وبنيت عرضًا فخمًا يليق بالعلامة.</p>
+          <ul>
+            <li>هوية بصرية متكاملة</li>
+            <li>تصوير المنتجات وإبراز التفاصيل</li>
+            <li>تجربة عرض أنيقة وسهلة</li>
+          </ul>
+        </article>
+        <article class="card project anim" style="--i:3">
+          <span class="p-ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/><path d="M9 20V9"/></svg>
+          </span>
+          <span class="p-num">02</span>
+          <h3>معرض الأعمال</h3>
+          <p class="p-desc">جمعت أعمالي، صنّفتها، ثم قدّمتها في معرض رقمي يعكس أسلوبي وتطوّري.</p>
+          <ul>
+            <li>تنظيم المشاريع وتصنيفها</li>
+            <li>سرد قصة كل عمل</li>
+            <li>تقديم احترافي أمام الجمهور</li>
+          </ul>
+        </article>
+      </div>
+      <p class="exp-quote anim" style="--i:4">
+        <span>◆</span> المشروع هو الامتحان الحقيقي لما تعلّمته <span>◆</span>
+      </p>
+    </section>
+
+    <!-- ========== 8) الخاتمة ========== -->
+    <section class="slide final" data-n="08" data-title="الخاتمة">
+      <div class="final-inner">
+        <div class="final-icon anim" style="--i:0">
+          <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.2">
+            <path d="M50 10 61 39 90 50 61 61 50 90 39 61 10 50 39 39Z"/>
+            <circle cx="50" cy="50" r="20"/>
+            <circle cx="50" cy="50" r="28" stroke-opacity=".4"/>
+          </svg>
+        </div>
+        <p class="final-kicker anim" style="--i:1">الخاتمة</p>
+        <h2 class="final-title anim" style="--i:2">
+          التعلّم الذاتي <span class="eq">=</span><br>
+          <span class="grad">مهارة الحياة</span>
+        </h2>
+        <p class="final-sub anim" style="--i:3">
+          لأنه لا ينتظر أحدًا ليبدأ، ولا يتوقف عند شهادة… بل ينمو مع كل تجربة.
+        </p>
+        <div class="final-chips anim" style="--i:4">
+          <span>لا ينتظر أحدًا ليبدأ</span>
+          <span>ينمو مع كل تجربة</span>
+          <span>يفتح أبوابًا لا تُغلق</span>
+        </div>
+        <div class="thanks anim" style="--i:5">
+          <b>شكرًا لكم</b>
+          <small>وأسئلتكم مرحّب بها</small>
+        </div>
+      </div>
+    </section>
+
+    <!-- شريط التحكم -->
+    <div class="stage-foot">
+      <div class="counter">
+        <b id="cur">01</b><span>/ 08</span>
+      </div>
+      <div class="dots" id="dots" role="tablist" aria-label="التنقل بين الشرائح"></div>
+      <div class="nav-group">
+        <button class="btn" id="prev" aria-label="الشريحة السابقة" title="السابق (→)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
+        </button>
+        <button class="btn" id="next" aria-label="الشريحة التالية" title="التالي (←)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg>
+        </button>
+        <button class="btn small" id="full" aria-label="ملء الشاشة" title="ملء الشاشة (F)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
+        </button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="progress"><b id="bar"></b></div>
+
+<script>
+(function(){
+  const stage  = document.getElementById('stage');
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const dotsEl = document.getElementById('dots');
+  const bar    = document.getElementById('bar');
+  const curEl  = document.getElementById('cur');
+  const prevBtn= document.getElementById('prev');
+  const nextBtn= document.getElementById('next');
+  const fullBtn= document.getElementById('full');
+  const total  = slides.length;
+  let index = 0;
+
+  /* ---------- مقياس المسرح ---------- */
+  function fit(){
+    const wrap = document.querySelector('.stage-wrap');
+    const cs = getComputedStyle(wrap);
+    const availW = window.innerWidth  - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    const availH = window.innerHeight - parseFloat(cs.paddingTop)  - parseFloat(cs.paddingBottom);
+    const scale = Math.min(availW / 1280, availH / 720);
+    stage.style.transform = 'scale(' + scale + ')';
+  }
+  window.addEventListener('resize', fit);
+  fit();
+
+  /* ---------- النقاط ---------- */
+  slides.forEach(function(s, i){
+    const b = document.createElement('button');
+    b.className = 'dot';
+    b.type = 'button';
+    b.setAttribute('role','tab');
+    b.setAttribute('aria-label','الشريحة ' + (i+1));
+    b.addEventListener('click', function(){ go(i); });
+    dotsEl.appendChild(b);
+  });
+  const dots = Array.from(dotsEl.children);
+
+  /* ---------- العرض ---------- */
+  function go(n){
+    if(n < 0 || n > total-1) return;
+    index = n;
+    slides.forEach(function(s, i){
+      const on = i === index;
+      s.classList.toggle('active', on);
+      s.setAttribute('aria-hidden', on ? 'false' : 'true');
+    });
+    dots.forEach(function(d, i){
+      d.classList.toggle('active', i === index);
+      d.setAttribute('aria-selected', i === index ? 'true' : 'false');
+    });
+    curEl.textContent = String(index+1).padStart(2,'0');
+    bar.style.width = (((index+1)/total)*100) + '%';
+    prevBtn.disabled = index === 0;
+    nextBtn.disabled = index === total-1;
+    try { history.replaceState(null, '', '#' + (index+1)); } catch(e){}
+  }
+
+  prevBtn.addEventListener('click', function(){ go(index-1); });
+  nextBtn.addEventListener('click', function(){ go(index+1); });
+
+  /* ---------- لوحة المفاتيح ---------- */
+  document.addEventListener('keydown', function(e){
+    const k = e.key;
+    if(k === 'ArrowLeft' || k === 'ArrowDown' || k === 'PageDown' || k === ' ' || k === 'Enter'){
+      e.preventDefault(); go(index+1);
+    } else if(k === 'ArrowRight' || k === 'ArrowUp' || k === 'PageUp' || k === 'Backspace'){
+      e.preventDefault(); go(index-1);
+    } else if(k === 'Home'){ e.preventDefault(); go(0); }
+    else if(k === 'End'){ e.preventDefault(); go(total-1); }
+    else if(k === 'f' || k === 'F'){ toggleFull(); }
+    else if(k === 'Escape' && document.fullscreenElement){ document.exitFullscreen(); }
+  });
+
+  /* ---------- ملء الشاشة ---------- */
+  function toggleFull(){
+    if(!document.fullscreenElement){
+      const el = document.documentElement;
+      if(el.requestFullscreen) el.requestFullscreen();
+    } else if(document.exitFullscreen){
+      document.exitFullscreen();
+    }
+  }
+  fullBtn.addEventListener('click', toggleFull);
+
+  /* ---------- اللمس ---------- */
+  let sx=0, sy=0, tracking=false;
+  stage.addEventListener('touchstart', function(e){
+    if(e.touches.length !== 1) return;
+    sx = e.touches[0].clientX; sy = e.touches[0].clientY; tracking = true;
+  }, {passive:true});
+  stage.addEventListener('touchend', function(e){
+    if(!tracking) return; tracking = false;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - sx, dy = t.clientY - sy;
+    if(Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)){
+      if(dx < 0) go(index+1); else go(index-1);
+    }
+  }, {passive:true});
+
+  /* ---------- البداية ---------- */
+  const fromHash = parseInt((location.hash || '').replace('#',''), 10);
+  const start = (!isNaN(fromHash) && fromHash >= 1 && fromHash <= total) ? fromHash-1 : 0;
+  index = start;
+  go(start);
+  prevBtn.disabled = index === 0;
+  nextBtn.disabled = index === total-1;
+})();
+</script>
+</body>
+</html>
